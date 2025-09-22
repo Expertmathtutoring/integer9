@@ -1,0 +1,238 @@
+<html lang="en">  
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐢🐇 Tortoise vs Rabbit Integer Race</title>
+<style>
+body {
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  background: linear-gradient(135deg, #1a1a1a, #004466);
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+h1 { color: #ffcc00; margin-bottom: 10px; }
+#track {
+  position: relative;
+  width: 95%;
+  height: 350px;
+  margin: 20px auto;
+  background: #333;
+  border-radius: 10px;
+}
+.stop {
+  width: 50px;
+  height: 50px;
+  background: #00ff99;
+  border-radius: 50%;
+  position: absolute;
+  text-align: center;
+  line-height: 50px;
+  font-weight: bold;
+  color: #000;
+  font-size: 1.2em;
+  z-index: 1;
+}
+.runner {
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  transition: left 1s ease, top 1s ease;
+  z-index: 10;
+}
+#questionBox {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+.playerBox {
+  background: rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 10px;
+  width: 250px;
+}
+.playerBox h2 { margin: 5px 0; color: #ffcc00; }
+.question { font-size: 1.3em; margin-bottom: 8px; }
+input {
+  font-size: 1.2em;
+  padding: 5px;
+  width: 120px;
+  text-align: center;
+}
+button {
+  font-size: 1em;
+  padding: 5px 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: none;
+  background: #ffcc00;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+.feedback {
+  margin-top: 8px;
+  font-size: 1.1em;
+  height: 25px;
+  color: #ffff66;
+}
+</style>
+</head>
+<body>
+
+<h1>🐢 vs 🐇 Integer Operation Race</h1>
+
+<div id="track"></div>
+
+<div id="questionBox">
+  <div class="playerBox" id="tortoiseBox">
+    <h2>🐢 Tortoise</h2>
+    <div class="question" id="tortoiseQ">Click Start</div>
+    <input type="text" id="tortoiseInput" placeholder="Answer">
+    <button onclick="checkAnswer('tortoise')">Submit</button>
+    <div class="feedback" id="tortoiseFeedback"></div>
+  </div>
+
+  <div class="playerBox" id="rabbitBox">
+    <h2>🐇 Rabbit</h2>
+    <div class="question" id="rabbitQ">Click Start</div>
+    <input type="text" id="rabbitInput" placeholder="Answer">
+    <button onclick="checkAnswer('rabbit')">Submit</button>
+    <div class="feedback" id="rabbitFeedback"></div>
+  </div>
+</div>
+
+<div style="margin-top:20px;">
+  <button onclick="startGame()">Start / Restart Game</button>
+</div>
+
+<script>
+const track = document.getElementById("track");
+
+// 🐢 Tortoise image
+let tortoise = document.createElement("img");
+tortoise.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Turtle_cartoon_04.svg/120px-Turtle_cartoon_04.svg.png";
+tortoise.className = "runner";
+track.appendChild(tortoise);
+
+// 🐇 Rabbit image
+let rabbit = document.createElement("img");
+rabbit.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Cute_cartoon_rabbit.svg/120px-Cute_cartoon_rabbit.svg.png";
+rabbit.className = "runner";
+track.appendChild(rabbit);
+
+let stops = [];
+let totalStops = 10;
+
+// Player states
+let players = {
+  tortoise: {current: 0, questions: [], answers: []},
+  rabbit: {current: 0, questions: [], answers: []}
+};
+
+function generateQuestions(player) {
+  players[player].questions = [];
+  players[player].answers = [];
+  for(let i=0;i<totalStops;i++){
+    let num1 = Math.floor(Math.random()*20)+1;
+    let num2 = Math.floor(Math.random()*20)+1;
+    let op = Math.random()<0.5 ? "+" : "-";
+    let question = `${num1} ${op} ${num2}`;
+    let answer = op==="+"? num1+num2 : num1-num2;
+    players[player].questions.push(question);
+    players[player].answers.push(answer);
+  }
+}
+
+function createStops() {
+  stops.forEach(s => track.removeChild(s.el));
+  stops = [];
+  for(let i=0;i<totalStops;i++){
+    let stop = document.createElement("div");
+    stop.classList.add("stop");
+    stop.textContent = i+1;
+    let left = 30 + i*70;
+    let top = 180 + Math.sin(i * Math.PI / 3) * 60;
+    stop.style.left = left + "px";
+    stop.style.top = top + "px";
+    track.appendChild(stop);
+    stops.push({el: stop, left, top});
+  }
+}
+
+function startGame(){
+  // reset players
+  players.tortoise.current = 0;
+  players.rabbit.current = 0;
+  generateQuestions("tortoise");
+  generateQuestions("rabbit");
+  createStops();
+  moveRunner("tortoise");
+  moveRunner("rabbit");
+  showQuestion("tortoise");
+  showQuestion("rabbit");
+  document.getElementById("tortoiseFeedback").textContent = "";
+  document.getElementById("rabbitFeedback").textContent = "";
+}
+
+function moveRunner(player){
+  if(players[player].current >= totalStops) return;
+  let stopPos = stops[players[player].current];
+  if(player==="tortoise"){
+    tortoise.style.left = stopPos.left + "px"; 
+    tortoise.style.top = (stopPos.top - 80) + "px"; 
+  } else {
+    rabbit.style.left = stopPos.left + "px"; 
+    rabbit.style.top = (stopPos.top - 10) + "px"; 
+  }
+}
+
+function showQuestion(player){
+  let qDiv = document.getElementById(player+"Q");
+  qDiv.textContent = `Stop ${players[player].current+1}: ${players[player].questions[players[player].current]}`;
+  document.getElementById(player+"Input").value = "";
+}
+
+function checkAnswer(player){
+  let userAns = parseInt(document.getElementById(player+"Input").value);
+  let current = players[player].current;
+  if(!isNaN(userAns) && userAns === players[player].answers[current]){
+    document.getElementById(player+"Feedback").textContent = "✅ Correct!";
+    players[player].current++;
+    if(players[player].current < totalStops){
+      moveRunner(player);
+      showQuestion(player);
+    } else {
+      document.getElementById(player+"Feedback").textContent = "🏁 Finished!";
+      checkWinner();
+    }
+  } else {
+    document.getElementById(player+"Feedback").textContent = "❌ Try again.";
+  }
+}
+
+function checkWinner(){
+  if(players.tortoise.current>=totalStops && players.rabbit.current>=totalStops){
+    alert("🤝 It's a tie!");
+  } else if(players.tortoise.current>=totalStops){
+    alert("🐢 Tortoise wins!");
+  } else if(players.rabbit.current>=totalStops){
+    alert("🐇 Rabbit wins!");
+  }
+}
+
+// Enter key support for both players
+["tortoise","rabbit"].forEach(p=>{
+  document.getElementById(p+"Input").addEventListener("keydown", function(e){
+    if(e.key==="Enter"){
+      e.preventDefault();
+      checkAnswer(p);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
