@@ -1,4 +1,5 @@
-<html lang="en">  
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,7 +39,7 @@ h1 { color: #ffcc00; margin-bottom: 10px; }
   width: 60px;
   height: 60px;
   position: absolute;
-  transition: left 1s ease, top 1s ease;
+  transition: left 0.8s ease, top 0.8s ease;
   z-index: 10;
 }
 #questionBox {
@@ -111,15 +112,14 @@ button {
 <script>
 const track = document.getElementById("track");
 
-// 🐢 Tortoise image
+// ✅ Use local images above stops
 let tortoise = document.createElement("img");
-tortoise.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Turtle_cartoon_04.svg/120px-Turtle_cartoon_04.svg.png";
+tortoise.src = "tortoise.jpg"; // local file
 tortoise.className = "runner";
 track.appendChild(tortoise);
 
-// 🐇 Rabbit image
 let rabbit = document.createElement("img");
-rabbit.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Cute_cartoon_rabbit.svg/120px-Cute_cartoon_rabbit.svg.png";
+rabbit.src = "rabbit.jpg"; // local file
 rabbit.className = "runner";
 track.appendChild(rabbit);
 
@@ -132,6 +132,7 @@ let players = {
   rabbit: {current: 0, questions: [], answers: []}
 };
 
+// Generate random questions
 function generateQuestions(player) {
   players[player].questions = [];
   players[player].answers = [];
@@ -146,6 +147,7 @@ function generateQuestions(player) {
   }
 }
 
+// Create track stops
 function createStops() {
   stops.forEach(s => track.removeChild(s.el));
   stops = [];
@@ -162,8 +164,8 @@ function createStops() {
   }
 }
 
+// Start / restart the game
 function startGame(){
-  // reset players
   players.tortoise.current = 0;
   players.rabbit.current = 0;
   generateQuestions("tortoise");
@@ -177,24 +179,27 @@ function startGame(){
   document.getElementById("rabbitFeedback").textContent = "";
 }
 
+// Move runner above the stop
 function moveRunner(player){
   if(players[player].current >= totalStops) return;
   let stopPos = stops[players[player].current];
   if(player==="tortoise"){
     tortoise.style.left = stopPos.left + "px"; 
-    tortoise.style.top = (stopPos.top - 80) + "px"; 
+    tortoise.style.top = (stopPos.top - 70) + "px"; // tortoise above stop
   } else {
     rabbit.style.left = stopPos.left + "px"; 
-    rabbit.style.top = (stopPos.top - 10) + "px"; 
+    rabbit.style.top = (stopPos.top - 70) + "px"; // rabbit above stop
   }
 }
 
+// Show current question
 function showQuestion(player){
   let qDiv = document.getElementById(player+"Q");
   qDiv.textContent = `Stop ${players[player].current+1}: ${players[player].questions[players[player].current]}`;
   document.getElementById(player+"Input").value = "";
 }
 
+// Check answer
 function checkAnswer(player){
   let userAns = parseInt(document.getElementById(player+"Input").value);
   let current = players[player].current;
@@ -213,6 +218,7 @@ function checkAnswer(player){
   }
 }
 
+// Determine winner
 function checkWinner(){
   if(players.tortoise.current>=totalStops && players.rabbit.current>=totalStops){
     alert("🤝 It's a tie!");
@@ -223,7 +229,7 @@ function checkWinner(){
   }
 }
 
-// Enter key support for both players
+// Enter key support
 ["tortoise","rabbit"].forEach(p=>{
   document.getElementById(p+"Input").addEventListener("keydown", function(e){
     if(e.key==="Enter"){
@@ -236,3 +242,4 @@ function checkWinner(){
 
 </body>
 </html>
+
