@@ -13,15 +13,19 @@ body {
   margin: 0;
   padding: 20px;
 }
+
 h1 { color: #ffcc00; margin-bottom: 10px; }
+
 #track {
   position: relative;
   width: 95%;
-  height: 350px;
+  height: 220px; /* reduced height */
   margin: 20px auto;
   background: #333;
   border-radius: 10px;
+  overflow: hidden;
 }
+
 .stop {
   width: 50px;
   height: 50px;
@@ -35,6 +39,7 @@ h1 { color: #ffcc00; margin-bottom: 10px; }
   font-size: 1.2em;
   z-index: 1;
 }
+
 .runner {
   width: 60px;
   height: 60px;
@@ -42,12 +47,14 @@ h1 { color: #ffcc00; margin-bottom: 10px; }
   transition: left 0.8s ease, top 0.8s ease;
   z-index: 20;
 }
+
 #questionBox {
   margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 40px;
 }
+
 .playerBox {
   background: rgba(255,255,255,0.1);
   padding: 15px;
@@ -112,27 +119,25 @@ button {
 <script>
 const track = document.getElementById("track");
 
-// ✅ Local images
+// Local images
 let tortoise = document.createElement("img");
-tortoise.src = "tortoise.jpg"; // place in same folder as HTML
+tortoise.src = "tortoise.jpg"; 
 tortoise.className = "runner";
 track.appendChild(tortoise);
 
 let rabbit = document.createElement("img");
-rabbit.src = "rabbit.jpg"; // place in same folder as HTML
+rabbit.src = "rabbit.jpg"; 
 rabbit.className = "runner";
 track.appendChild(rabbit);
 
 let stops = [];
 let totalStops = 10;
 
-// Player states
 let players = {
   tortoise: {current: 0, questions: [], answers: []},
   rabbit: {current: 0, questions: [], answers: []}
 };
 
-// Generate questions for a player
 function generateQuestions(player) {
   players[player].questions = [];
   players[player].answers = [];
@@ -147,7 +152,6 @@ function generateQuestions(player) {
   }
 }
 
-// Create stops
 function createStops() {
   stops.forEach(s => track.removeChild(s.el));
   stops = [];
@@ -155,8 +159,9 @@ function createStops() {
     let stop = document.createElement("div");
     stop.classList.add("stop");
     stop.textContent = i+1;
-    let left = 30 + i*70;
-    let top = 180 + Math.sin(i * Math.PI / 3) * 60;
+    // reduced top range to fit in 220px
+    let left = 30 + i*65;
+    let top = 80 + Math.sin(i * Math.PI / 3) * 50;
     stop.style.left = left + "px";
     stop.style.top = top + "px";
     track.appendChild(stop);
@@ -164,7 +169,6 @@ function createStops() {
   }
 }
 
-// Start/restart game
 function startGame(){
   players.tortoise.current = 0;
   players.rabbit.current = 0;
@@ -179,27 +183,24 @@ function startGame(){
   document.getElementById("rabbitFeedback").textContent = "";
 }
 
-// Move player image
 function moveRunner(player){
   if(players[player].current >= totalStops) return;
   let stopPos = stops[players[player].current];
   if(player==="tortoise"){
     tortoise.style.left = stopPos.left + "px"; 
-    tortoise.style.top = (stopPos.top - 80) + "px"; // above stop
+    tortoise.style.top = (stopPos.top - 60) + "px"; 
   } else {
     rabbit.style.left = stopPos.left + "px"; 
-    rabbit.style.top = (stopPos.top - 30) + "px"; // slightly lower so both visible
+    rabbit.style.top = (stopPos.top - 20) + "px"; 
   }
 }
 
-// Show question for player
 function showQuestion(player){
   let qDiv = document.getElementById(player+"Q");
   qDiv.textContent = `Stop ${players[player].current+1}: ${players[player].questions[players[player].current]}`;
   document.getElementById(player+"Input").value = "";
 }
 
-// Check answer
 function checkAnswer(player){
   let userAns = parseInt(document.getElementById(player+"Input").value);
   let current = players[player].current;
@@ -218,7 +219,6 @@ function checkAnswer(player){
   }
 }
 
-// Determine winner
 function checkWinner(){
   if(players.tortoise.current>=totalStops && players.rabbit.current>=totalStops){
     alert("🤝 It's a tie!");
@@ -229,7 +229,6 @@ function checkWinner(){
   }
 }
 
-// Enter key support
 ["tortoise","rabbit"].forEach(p=>{
   document.getElementById(p+"Input").addEventListener("keydown", function(e){
     if(e.key==="Enter"){
